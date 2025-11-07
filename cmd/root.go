@@ -15,20 +15,23 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "iod",
-	Short: "Download files from directory listing websites",
-	Long: `A CLI tool to download and index files from directory listing websites
-like example.com. It can recursively download files matching specific patterns.`,
+	Short: "Archive Bot - Download files from directory listing websites",
+	Long: `🤖 Archive Bot - Automated archival tool for directory listing websites
+
+A CLI tool to download and archive files from directory listing websites
+like bitsavers.org, archive.org, and other index pages. Recursively crawls
+and preserves entire directory structures.`,
 	Example: `  # Download all files from a directory
-  iod download https://example.com/pdf/microsoft/ -o ./downloads
+  iod download https://bitsavers.org/pdf/microsoft/ -o ./downloads
 
   # Download recursively with max depth of 3
-  iod download https://example.com/pdf/microsoft/ -r -d 3 -o ./downloads
+  iod download https://bitsavers.org/pdf/microsoft/ -r -d 3 -o ./downloads
 
   # Download only PDF files
-  iod download https://example.com/pdf/microsoft/ -p "*.pdf" -o ./downloads
+  iod download https://bitsavers.org/pdf/microsoft/ -p "*.pdf" -o ./downloads
 
   # List files without downloading
-  iod list https://example.com/pdf/microsoft/ -r`,
+  iod list https://bitsavers.org/pdf/microsoft/ -r`,
 }
 
 func Execute() error {

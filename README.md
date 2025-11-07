@@ -1,6 +1,8 @@
-# IndexOf Downloader (iod)
+# IndexOf Downloader (iod) 🤖
 
-A **universal file downloader** CLI tool written in Go for downloading **ANY file type** from directory listing websites (Apache/Nginx directory listings, old FTP archives, bitsavers.org, etc.).
+**Archive Bot** - A universal file archival CLI tool written in Go for downloading **ANY file type** from directory listing websites (Apache/Nginx directory listings, old FTP archives, bitsavers.org, etc.).
+
+Automated archival tool that preserves entire directory structures from index pages.
 
 ## Features
 

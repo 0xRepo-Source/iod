@@ -211,6 +211,11 @@ func (d *Downloader) scanDirectory(dirURL, relativePath string, depth int, visit
 			return
 		}
 
+		// Skip if the link points to the current directory itself
+		if absoluteURL == dirURL || strings.TrimSuffix(absoluteURL, "/") == strings.TrimSuffix(dirURL, "/") {
+			return
+		}
+
 		// Determine if it's a directory (ends with /)
 		isDir := strings.HasSuffix(href, "/")
 
@@ -221,11 +226,21 @@ func (d *Downloader) scanDirectory(dirURL, relativePath string, depth int, visit
 				d.scanDirectory(absoluteURL, newRelativePath, depth+1, visited, files)
 			}
 		} else {
-			// It's a file
+			// It's a file - try to get the size from the page
+			fileSize := int64(0)
+
+			// Try to extract size from the text next to the link (common in Apache listings)
+			// Look for patterns like "1.2M", "500K", "1234" etc.
+			parentText := s.Parent().Text()
+			if sizeStr := extractSize(parentText); sizeStr != "" {
+				fileSize = parseHumanSize(sizeStr)
+			}
+
 			filePath := filepath.Join(relativePath, filepath.Base(href))
 			*files = append(*files, FileInfo{
 				URL:  absoluteURL,
 				Path: filePath,
+				Size: fileSize,
 			})
 		}
 	})
@@ -270,19 +285,41 @@ func (d *Downloader) downloadFile(file FileInfo) error {
 
 	// Create progress bar
 	var reader io.Reader = resp.Body
+	var bar *progressbar.ProgressBar
+
 	if resp.ContentLength > 0 {
-		bar := progressbar.DefaultBytes(
+		// Progress bar with known size
+		bar = progressbar.DefaultBytes(
 			resp.ContentLength,
 			filepath.Base(file.Path),
 		)
 		reader = io.TeeReader(resp.Body, bar)
-	}
-
-	// Copy data
+	} else {
+		// Progress bar with unknown size (spinner mode)
+		bar = progressbar.NewOptions(-1,
+			progressbar.OptionSetDescription(filepath.Base(file.Path)),
+			progressbar.OptionSetWriter(os.Stderr),
+			progressbar.OptionShowBytes(true),
+			progressbar.OptionThrottle(65*time.Millisecond),
+			progressbar.OptionShowCount(),
+			progressbar.OptionOnCompletion(func() {
+				fmt.Fprint(os.Stderr, "\n")
+			}),
+			progressbar.OptionSpinnerType(14),
+			progressbar.OptionFullWidth(),
+		)
+		r := progressbar.NewReader(resp.Body, bar)
+		reader = &r
+	} // Copy data
 	written, err := io.Copy(outFile, reader)
 	if err != nil {
 		os.Remove(outputPath) // Clean up partial download
 		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	// Finish the progress bar
+	if bar != nil {
+		bar.Finish()
 	}
 
 	d.mu.Lock()
@@ -308,4 +345,64 @@ func (d *Downloader) filterByPattern(files []FileInfo) []FileInfo {
 	}
 
 	return filtered
+}
+
+// extractSize tries to find a file size in common formats from text
+func extractSize(text string) string {
+	// Common patterns: "1.2M", "500K", "1234", "1.2G", etc.
+	// Look for number followed by optional size unit
+	fields := strings.Fields(text)
+	for _, field := range fields {
+		field = strings.TrimSpace(field)
+		// Check if it looks like a size (contains numbers and possibly K, M, G, etc.)
+		if len(field) > 0 && (strings.ContainsAny(field, "0123456789")) {
+			// Check for size suffixes
+			upper := strings.ToUpper(field)
+			if strings.ContainsAny(upper, "KMGTB") || strings.Contains(field, ".") {
+				return field
+			}
+			// Pure numbers (bytes)
+			if _, err := fmt.Sscanf(field, "%d", new(int64)); err == nil {
+				return field
+			}
+		}
+	}
+	return ""
+}
+
+// parseHumanSize converts human-readable sizes to bytes
+func parseHumanSize(s string) int64 {
+	s = strings.TrimSpace(s)
+	if s == "" || s == "-" {
+		return 0
+	}
+
+	// Try to parse as plain number first
+	var size int64
+	if _, err := fmt.Sscanf(s, "%d", &size); err == nil {
+		return size
+	}
+
+	// Parse with suffix (1.2M, 500K, etc.)
+	var num float64
+	var suffix string
+	if n, err := fmt.Sscanf(s, "%f%s", &num, &suffix); n >= 1 && err == nil {
+		multiplier := int64(1)
+		suffix = strings.ToUpper(strings.TrimSpace(suffix))
+
+		switch {
+		case strings.HasPrefix(suffix, "K"):
+			multiplier = 1024
+		case strings.HasPrefix(suffix, "M"):
+			multiplier = 1024 * 1024
+		case strings.HasPrefix(suffix, "G"):
+			multiplier = 1024 * 1024 * 1024
+		case strings.HasPrefix(suffix, "T"):
+			multiplier = 1024 * 1024 * 1024 * 1024
+		}
+
+		return int64(num * float64(multiplier))
+	}
+
+	return 0
 }

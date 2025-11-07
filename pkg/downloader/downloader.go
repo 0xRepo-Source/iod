@@ -69,6 +69,31 @@ func (d *Downloader) getWithUserAgent(url string) (*http.Response, error) {
 	return d.httpClient.Do(req)
 }
 
+// convertArchiveOrgURL converts archive.org Wayback Machine URLs to raw file URLs
+func convertArchiveOrgURL(urlStr string) string {
+	// Check if it's a Wayback Machine URL
+	if strings.Contains(urlStr, "web.archive.org/web/") {
+		// Format: https://web.archive.org/web/TIMESTAMP/ORIGINAL_URL
+		// We need to add "id_" before the original URL to get the raw file
+		// Pattern: https://web.archive.org/web/TIMESTAMP/ORIGINAL_URL
+		//      ->  https://web.archive.org/web/TIMESTAMPid_/ORIGINAL_URL
+
+		parts := strings.SplitN(urlStr, "/web/", 2)
+		if len(parts) == 2 {
+			// Split timestamp from rest of URL
+			remainder := parts[1]
+			slashIdx := strings.Index(remainder, "/")
+			if slashIdx > 0 {
+				timestamp := remainder[:slashIdx]
+				originalURL := remainder[slashIdx:]
+				// Add "id_" suffix to timestamp to get raw file
+				return parts[0] + "/web/" + timestamp + "id_" + originalURL
+			}
+		}
+	}
+	return urlStr
+}
+
 func (d *Downloader) Download() (*DownloadStats, error) {
 	files, err := d.ListFiles()
 	if err != nil {
@@ -265,8 +290,15 @@ func (d *Downloader) downloadFile(file FileInfo) error {
 		return nil
 	}
 
+	// Convert archive.org URLs to raw file URLs
+	downloadURL := convertArchiveOrgURL(file.URL)
+
+	if d.config.Verbose && downloadURL != file.URL {
+		fmt.Printf("→ Using raw URL: %s\n", downloadURL)
+	}
+
 	// Download the file
-	resp, err := d.getWithUserAgent(file.URL)
+	resp, err := d.getWithUserAgent(downloadURL)
 	if err != nil {
 		return fmt.Errorf("failed to download: %w", err)
 	}

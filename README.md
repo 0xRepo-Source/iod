@@ -1,23 +1,17 @@
-# IndexOf Downloader
+# IndexOf Downloader (iod)
 
-A **universal file downloader** CLI tool written in Go for downloading **ANY file type** from directory listing websites like example.com, old FTP archives, and Apache-style index pages.
-
-> **📖 Want to download entire directory trees?** See [RECURSIVE_DOWNLOAD.md](RECURSIVE_DOWNLOAD.md) for a complete guide on full recursive downloads.
-> 
-> **📦 Works with all file types!** See [FILE_TYPES.md](FILE_TYPES.md) for examples of PDFs, ZIPs, ISOs, videos, images, executables, and more.
+A **universal file downloader** CLI tool written in Go for downloading **ANY file type** from directory listing websites (Apache/Nginx directory listings, old FTP archives, bitsavers.org, etc.).
 
 ## Features
 
-- 📥 **Download ANY file type** - PDFs, ZIPs, ISOs, EXEs, images, videos, documents, etc.
-- 🔄 **Full recursive directory traversal** - Download entire directory trees
-- 🎯 File pattern matching (e.g., `*.pdf`, `*.zip`, `*.iso`, `*.exe`)
-- ⚡ Concurrent downloads with configurable workers
-- 📊 Progress bars for downloads
-- 📝 List files without downloading
-- 🎨 Colorful and informative output
-- 🚀 Fast and efficient
-- 🔁 Resume support - Skips already downloaded files
-- 🌐 Works with Apache/Nginx directory listings, old FTP sites, archive repositories
+- 📥 **Universal file downloader** - Downloads ANY file type (PDFs, ZIPs, ISOs, EXEs, videos, images, documents, ROMs, archives, etc.)
+- 🔄 **Recursive directory traversal** - Download entire directory trees with unlimited depth
+- 🎯 **Pattern matching** - Filter files by extension (e.g., `*.pdf`, `*.zip`, `*.iso`, `*.exe`)
+- ⚡ **Concurrent downloads** - Configurable worker pool for faster downloads
+- 📊 **Progress tracking** - Real-time progress bars for each file
+- 📝 **Preview mode** - List files without downloading
+-  **Resume support** - Automatically skips already downloaded files
+- 🌐 **Universal compatibility** - Works with Apache/Nginx listings, FTP archives, bitsavers.org, and more
 
 ## Installation
 
@@ -28,8 +22,9 @@ A **universal file downloader** CLI tool written in Go for downloading **ANY fil
 ### Build from Source
 
 ```bash
-# Clone or navigate to the repository
-cd IndexOf
+# Clone the repository
+git clone https://github.com/0xRepo-Source/iod.git
+cd iod
 
 # Download dependencies
 go mod download
@@ -41,60 +36,73 @@ go build -o iod.exe
 go install
 ```
 
+## Quick Start
+
+```bash
+# Download all files from a URL
+iod download https://bitsavers.org/pdf/microsoft/ -o ./downloads
+
+# Download recursively (all subdirectories)
+iod download https://bitsavers.org/pdf/microsoft/ -r -o ./downloads
+
+# Download only PDFs, recursively
+iod download https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf" -o ./pdfs
+
+# Preview files before downloading
+iod list https://bitsavers.org/pdf/microsoft/ -r -v
+```
+
 ## Usage
 
-### Download Files
+### Download Command
 
-Download all files from a directory:
+**Basic download:**
 ```bash
-iod download https://example.com/pdf/microsoft/ -o ./downloads
+iod download https://bitsavers.org/pdf/microsoft/ -o ./downloads
 ```
 
-**Download everything recursively (all subdirectories):**
+**Recursive download (all subdirectories):**
 ```bash
-iod download https://example.com/pdf/microsoft/ -r -o ./downloads
+iod download https://bitsavers.org/pdf/microsoft/ -r -o ./downloads
 ```
 
-Download recursively with a maximum depth of 3:
+**Control recursion depth:**
 ```bash
-iod download https://example.com/pdf/microsoft/ -r -d 3 -o ./downloads
+iod download https://bitsavers.org/pdf/microsoft/ -r -d 3 -o ./downloads
 ```
 
-Download only specific file types:
+**Filter by file type:**
 ```bash
 # Only PDFs
-iod download https://example.com/pdf/microsoft/ -r -p "*.pdf" -o ./downloads
+iod download https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf" -o ./downloads
 
-# Only ZIP archives
-iod download https://example.com/archive/ -r -p "*.zip" -o ./archives
+# Only ZIP files
+iod download https://archive.org/download/something/ -r -p "*.zip" -o ./archives
 
 # Only ISO images
-iod download https://example.com/isos/ -r -p "*.iso" -o ./isos
-
-# Only executables
-iod download https://example.com/software/ -r -p "*.exe" -o ./software
+iod download https://example.org/isos/ -r -p "*.iso" -o ./isos
 ```
 
-Download with 5 concurrent workers:
+**Faster downloads with multiple workers:**
 ```bash
-iod download https://example.com/pdf/microsoft/ -r -w 5 -o ./downloads
+iod download https://bitsavers.org/pdf/microsoft/ -r -w 10 -o ./downloads
 ```
 
-### List Files
+### List Command
 
-List all files without downloading:
+**Preview files without downloading:**
 ```bash
-iod list https://example.com/pdf/microsoft/
+iod list https://bitsavers.org/pdf/microsoft/
 ```
 
-List files recursively with verbose output:
+**List recursively with details:**
 ```bash
-iod list https://example.com/pdf/microsoft/ -r -v
+iod list https://bitsavers.org/pdf/microsoft/ -r -v
 ```
 
-List only ZIP files:
+**List specific file types:**
 ```bash
-iod list https://example.com/pdf/microsoft/ -r -p "*.zip"
+iod list https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf"
 ```
 
 ## Command Reference
@@ -105,48 +113,52 @@ iod list https://example.com/pdf/microsoft/ -r -p "*.zip"
 
 ### Download Command
 
-```
+```bash
 iod download [URL] [flags]
 ```
 
 **Flags:**
-- `-o, --output string`: Output directory for downloaded files (default: `./downloads`)
-- `-r, --recursive`: Download recursively
-- `-d, --depth int`: Maximum depth for recursive download (-1 for unlimited, default: -1)
-- `-p, --pattern string`: File pattern to match, e.g., `*.pdf`, `*.zip` (default: `*`)
+- `-o, --output string`: Output directory (default: `./downloads`)
+- `-r, --recursive`: Download recursively through subdirectories
+- `-d, --depth int`: Maximum recursion depth, -1 for unlimited (default: -1)
+- `-p, --pattern string`: File pattern filter (e.g., `*.pdf`, `*.zip`) (default: `*`)
 - `-w, --workers int`: Number of concurrent downloads (default: 3)
 
 ### List Command
 
-```
+```bash
 iod list [URL] [flags]
 ```
 
 **Flags:**
 - `-r, --recursive`: List files recursively
-- `-d, --depth int`: Maximum depth for recursive listing (-1 for unlimited, default: -1)
-- `-p, --pattern string`: File pattern to match, e.g., `*.pdf`, `*.zip` (default: `*`)
+- `-d, --depth int`: Maximum depth for listing (default: -1)
+- `-p, --pattern string`: File pattern filter (default: `*`)
 
-## Examples
+## Real-World Examples
 
-### Download Microsoft PDFs from example.com
+### Archive a Website's PDF Collection
 
 ```bash
-# Download all files from the microsoft directory
-iod download https://example.com/pdf/microsoft/ -o ./microsoft-docs
-
-# Download only PDFs recursively (depth 2)
-iod download https://example.com/pdf/microsoft/ -r -d 2 -p "*.pdf" -o ./microsoft-pdfs
+# Download all PDFs from bitsavers.org
+iod download https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf" -o ./bitsavers-microsoft
 ```
 
-### List Files Before Downloading
+### Download Software Archives
 
 ```bash
-# First, see what files are available
-iod list https://example.com/pdf/microsoft/ -r -v
+# Download all ZIP files
+iod download https://archive.org/download/software_collection/ -r -p "*.zip" -o ./software
 
-# Then download specific patterns
-iod download https://example.com/pdf/microsoft/ -r -p "*.pdf" -o ./downloads
+# Download all ISO images
+iod download https://example.org/isos/linux/ -r -p "*.iso" -o ./isos
+```
+
+### Fast Batch Download
+
+```bash
+# Use 10 workers for faster downloading
+iod download https://bitsavers.org/pdf/dec/ -r -w 10 -o ./dec-docs
 ```
 
 ## Output

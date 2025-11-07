@@ -15,16 +15,6 @@ var listCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		url := args[0]
 
-		// Announce the bot
-		fmt.Println("🤖 Archive Bot v1.0.0 - Scanning directory structure...")
-		fmt.Printf("📍 Target: %s\n", url)
-		if recursive {
-			fmt.Println("🔄 Mode: Recursive scan")
-		} else {
-			fmt.Println("📄 Mode: Single directory")
-		}
-		fmt.Println()
-
 		config := downloader.Config{
 			BaseURL:     url,
 			Recursive:   recursive,
@@ -39,12 +29,12 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("failed to list files: %w", err)
 		}
 
-		fmt.Printf("📋 Archive Bot found %d files:\n\n", len(files))
+		fmt.Printf("Found %d files:\n\n", len(files))
 		for _, file := range files {
 			if verbose {
-				fmt.Printf("  %s (%s)\n", file.URL, formatBytes(file.Size))
+				fmt.Printf("%s (%s)\n", file.URL, formatBytes(file.Size))
 			} else {
-				fmt.Printf("  %s\n", file.URL)
+				fmt.Printf("%s\n", file.URL)
 			}
 		}
 

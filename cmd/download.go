@@ -17,16 +17,6 @@ var downloadCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		url := args[0]
 
-		// Announce the bot
-		fmt.Println("🤖 Archive Bot v1.0.0 - Initiating download sequence...")
-		fmt.Printf("📍 Target: %s\n", url)
-		if recursive {
-			fmt.Println("🔄 Mode: Recursive archival")
-		} else {
-			fmt.Println("📄 Mode: Single directory")
-		}
-		fmt.Println()
-
 		// Create output directory if it doesn't exist
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			return fmt.Errorf("failed to create output directory: %w", err)
@@ -54,12 +44,12 @@ var downloadCmd = &cobra.Command{
 			return fmt.Errorf("download failed: %w", err)
 		}
 
-		fmt.Printf("\n✅ Archive Bot completed successfully!\n")
-		fmt.Printf("  📦 Files archived: %d\n", stats.FilesDownloaded)
-		fmt.Printf("  💾 Total size: %s\n", formatBytes(stats.TotalBytes))
-		fmt.Printf("  📂 Directories scanned: %d\n", stats.DirsScanned)
+		fmt.Printf("\n✓ Download completed!\n")
+		fmt.Printf("  Files downloaded: %d\n", stats.FilesDownloaded)
+		fmt.Printf("  Total size: %s\n", formatBytes(stats.TotalBytes))
+		fmt.Printf("  Directories scanned: %d\n", stats.DirsScanned)
 		if stats.FailedDownloads > 0 {
-			fmt.Printf("  ⚠️  Failed downloads: %d\n", stats.FailedDownloads)
+			fmt.Printf("  Failed downloads: %d\n", stats.FailedDownloads)
 		}
 
 		return nil

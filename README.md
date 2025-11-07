@@ -1,8 +1,8 @@
-# IndexOf Downloader (iod) 🤖
+# IndexOf Downloader (iod)
 
-**Archive Bot** - A universal file archival CLI tool written in Go for downloading **ANY file type** from directory listing websites (Apache/Nginx directory listings, old FTP archives, bitsavers.org, etc.).
+A CLI tool for downloading files from directory listing websites (Apache/Nginx directory listings, old FTP archives, bitsavers.org, etc.).
 
-Automated archival tool that preserves entire directory structures from index pages.
+Uses "Archive Bot" user-agent to properly identify itself to web servers.
 
 ## Features
 
@@ -42,16 +42,16 @@ go install
 
 ```bash
 # Download all files from a URL
-iod download https://bitsavers.org/pdf/microsoft/ -o ./downloads
+iod download https://example.com -o ./downloads
 
 # Download recursively (all subdirectories)
-iod download https://bitsavers.org/pdf/microsoft/ -r -o ./downloads
+iod download https://example.com -r -o ./downloads
 
 # Download only PDFs, recursively
-iod download https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf" -o ./pdfs
+iod download https://example.com -r -p "*.pdf" -o ./pdfs
 
 # Preview files before downloading
-iod list https://bitsavers.org/pdf/microsoft/ -r -v
+iod list https://example.com -r -v
 ```
 
 ## Usage
@@ -60,23 +60,23 @@ iod list https://bitsavers.org/pdf/microsoft/ -r -v
 
 **Basic download:**
 ```bash
-iod download https://bitsavers.org/pdf/microsoft/ -o ./downloads
+iod download https://example.com -o ./downloads
 ```
 
 **Recursive download (all subdirectories):**
 ```bash
-iod download https://bitsavers.org/pdf/microsoft/ -r -o ./downloads
+iod download https://example.com -r -o ./downloads
 ```
 
 **Control recursion depth:**
 ```bash
-iod download https://bitsavers.org/pdf/microsoft/ -r -d 3 -o ./downloads
+iod download https://example.com -r -d 3 -o ./downloads
 ```
 
 **Filter by file type:**
 ```bash
 # Only PDFs
-iod download https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf" -o ./downloads
+iod download https://example.com -r -p "*.pdf" -o ./downloads
 
 # Only ZIP files
 iod download https://archive.org/download/something/ -r -p "*.zip" -o ./archives
@@ -87,24 +87,24 @@ iod download https://example.org/isos/ -r -p "*.iso" -o ./isos
 
 **Faster downloads with multiple workers:**
 ```bash
-iod download https://bitsavers.org/pdf/microsoft/ -r -w 10 -o ./downloads
+iod download https://example.com -r -w 10 -o ./downloads
 ```
 
 ### List Command
 
 **Preview files without downloading:**
 ```bash
-iod list https://bitsavers.org/pdf/microsoft/
+iod list https://example.com
 ```
 
 **List recursively with details:**
 ```bash
-iod list https://bitsavers.org/pdf/microsoft/ -r -v
+iod list https://example.com -r -v
 ```
 
 **List specific file types:**
 ```bash
-iod list https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf"
+iod list https://example.com -r -p "*.pdf"
 ```
 
 ## Command Reference
@@ -143,7 +143,7 @@ iod list [URL] [flags]
 
 ```bash
 # Download all PDFs from bitsavers.org
-iod download https://bitsavers.org/pdf/microsoft/ -r -p "*.pdf" -o ./bitsavers-microsoft
+iod download https://example.com -r -p "*.pdf" -o ./bitsavers-microsoft
 ```
 
 ### Download Software Archives

@@ -59,6 +59,16 @@ func NewDownloader(config Config) *Downloader {
 	}
 }
 
+// Helper function to make HTTP GET requests with Archive Bot user agent
+func (d *Downloader) getWithUserAgent(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Archive Bot/1.0; +https://github.com/0xRepo-Source/iod)")
+	return d.httpClient.Do(req)
+}
+
 func (d *Downloader) Download() (*DownloadStats, error) {
 	files, err := d.ListFiles()
 	if err != nil {
@@ -148,7 +158,7 @@ func (d *Downloader) scanDirectory(dirURL, relativePath string, depth int, visit
 	}
 
 	// Fetch the directory listing
-	resp, err := d.httpClient.Get(dirURL)
+	resp, err := d.getWithUserAgent(dirURL)
 	if err != nil {
 		return fmt.Errorf("failed to fetch %s: %w", dirURL, err)
 	}
@@ -241,7 +251,7 @@ func (d *Downloader) downloadFile(file FileInfo) error {
 	}
 
 	// Download the file
-	resp, err := d.httpClient.Get(file.URL)
+	resp, err := d.getWithUserAgent(file.URL)
 	if err != nil {
 		return fmt.Errorf("failed to download: %w", err)
 	}

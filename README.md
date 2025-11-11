@@ -1,4 +1,4 @@
-# IndexOf Downloader (iod)
+# Index Of Downloader (iod)
 
 A CLI tool for downloading files from directory listing websites (Apache/Nginx directory listings, old FTP archives, bitsavers.org, etc.).
 
